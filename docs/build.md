@@ -2,6 +2,7 @@
 
 Phase 1 establishes the ADPP provider shell for `anolis-provider-bread`.
 Phase 2 adds the provider-owned CRUMBS session layer that later phases will build on.
+Phase 3 adds BREAD inventory and compatibility logic on top of the BREAD contract headers.
 
 ## Workspace Layout
 
@@ -23,10 +24,11 @@ repos_feast/
 - Ninja or Visual Studio generators
 - `VCPKG_ROOT` set to a working vcpkg installation
 - vcpkg manifest dependencies available for `protobuf`, `yaml-cpp`, and `gtest`
+- sibling source repos for `CRUMBS` and `bread-crumbs-contracts`
 
 ## Foundation-Only Configure
 
-Use the foundation path when you want the config-backed shell without Linux hardware integration.
+Use the foundation path when you want the config-backed shell, CRUMBS session tests, and BREAD inventory logic without Linux hardware integration.
 
 On Windows with MSVC:
 
@@ -75,13 +77,14 @@ Start the provider shell for ADPP clients:
 .\build\dev-windows-foundation-debug\Debug\anolis-provider-bread.exe --config config\example.local.yaml
 ```
 
-The committed stub config seeds one RLHT and one DCMT device so `Hello`, `WaitReady`, `ListDevices`, `DescribeDevice`, and `GetHealth` are testable before real hardware work begins.
+The committed sample config seeds one RLHT and one DCMT device so `Hello`, `WaitReady`, `ListDevices`, `DescribeDevice`, and `GetHealth` are testable before real hardware work begins.
 
 ## Notes
 
+- `CRUMBS` and `bread-crumbs-contracts` are now first-class source dependencies for all builds.
 - Hardware integration is intentionally gated behind `ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE`.
 - When hardware integration is enabled, the parent build should add `linux-wire` before `CRUMBS`.
-- Current BREAD headers include CRUMBS headers directly, so future device adapter targets should link through the local `anolis_provider_bread_bread_contracts` interface target.
-- Phase 2 adds a provider-owned CRUMBS session layer. Foundation builds exercise it through fake-transport unit tests; Linux hardware builds compile the real `linux_transport` adapter.
-- `LinuxTransport::bind_device(...)` exists specifically so later phases use `bread-crumbs-contracts` for RLHT/DCMT operations instead of rebuilding those contracts on raw CRUMBS frames.
+- The Phase 2 session layer owns scan/send/read/query-read behavior only.
+- Phase 3 inventory and compatibility code uses `bread-crumbs-contracts` for type IDs, baseline capability profiles, and compatibility rules instead of duplicating those contracts locally.
+- `LinuxTransport::bind_device(...)` exists so later phases can call RLHT/DCMT helpers from `bread-crumbs-contracts` rather than rebuilding device wire logic.
 - In Phase 1, `ReadSignals` and `Call` are intentionally present but return `CODE_UNIMPLEMENTED` after validating device and identifier existence.
