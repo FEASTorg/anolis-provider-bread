@@ -16,9 +16,9 @@ It is intentionally scoped to **BREAD-over-CRUMBS** rather than to CRUMBS in gen
 The provider should stay organized around a small number of concrete responsibilities:
 
 - **Provider core**: ADPP transport, lifecycle, configuration, logging, health, and request handling.
-- **CRUMBS session layer**: Linux I2C/CRUMBS session management, scan/send/read primitives, timeout and retry behavior, bus access serialization, and diagnostics.
+- **CRUMBS session layer**: Linux I2C or CRUMBS session management, scan/send/read primitives, timeout and retry behavior, bus access serialization, and diagnostics.
 - **BREAD shared helpers**: small shared logic for discovery, compatibility checks, and capability fallback where that duplication is genuinely structural.
-- **Device adapters**: one adapter per BREAD device type, each owning its ADPP metadata, signals, functions, and call/read translation.
+- **Device adapters**: one adapter per BREAD device type, each owning its ADPP metadata, signals, functions, and call or read translation.
 
 A separate large family-wide abstraction layer is not assumed up front.
 
@@ -26,7 +26,7 @@ A separate large family-wide abstraction layer is not assumed up front.
 
 - Keep the CRUMBS layer focused on transport, session, and bus mechanics.
 - Keep BREAD version, capability, and state semantics above that layer.
-- Keep CRUMBS/Linux details localized and minimal in higher layers.
+- Keep CRUMBS or Linux details localized and minimal in higher layers.
 - Optional behavior must be gated by BREAD capability flags, not by generation labels.
 - Extraction should happen only when a second real CRUMBS-family consumer exists.
 
@@ -40,10 +40,12 @@ This repo is intended to sit on top of:
 
 Current implementation constraints include:
 
+- `anolis-protocol` should follow the same submodule-first pattern used by the other Anolis provider repos,
 - Linux-first host support via the CRUMBS Linux HAL,
-- direct dependence on the current BREAD contract headers for RLHT/DCMT behavior,
+- direct dependence on the current BREAD contract headers for RLHT and DCMT behavior,
 - the fact that current BREAD contract headers expose CRUMBS headers and types directly,
-- the need for explicit CMake handling so CRUMBS can see `linux-wire` when Linux HAL support is enabled,
+- third-party dependency alignment with `anolis-provider-sim` through `vcpkg` using `protobuf`, `yaml-cpp`, and `gtest`,
+- explicit CMake handling in `CRUMBS` so Linux HAL can consume either an installed `linux_wire::linux_wire` package target or a local build-tree bridge when `linux-wire` is added as a sibling source dependency,
 - the licensing implications of consuming CRUMBS directly.
 
 ## Working Notes
