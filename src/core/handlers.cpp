@@ -63,7 +63,7 @@ void handle_hello(const HelloRequest &request, Response &response) {
     (*hello->mutable_metadata())["transport"] = "stdio+uint32_le";
     (*hello->mutable_metadata())["max_frame_bytes"] = std::to_string(transport::kMaxFrameBytes);
     (*hello->mutable_metadata())["supports_wait_ready"] = "true";
-    (*hello->mutable_metadata())["inventory_mode"] = "config_seeded";
+    (*hello->mutable_metadata())["inventory_mode"] = runtime::snapshot().inventory_mode;
     set_status_ok(response);
 }
 

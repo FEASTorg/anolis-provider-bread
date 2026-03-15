@@ -55,6 +55,9 @@ TEST(ProtoSmokeTest, CanPopulateAndSerializeHelloResponseManually) {
 }
 
 TEST(ProtoSmokeTest, HelloHandlerProducesSerializableResponse) {
+    anolis_provider_bread::runtime::reset();
+    anolis_provider_bread::runtime::initialize(make_stub_config());
+
     anolis::deviceprovider::v1::HelloRequest request;
     request.set_protocol_version("v1");
     request.set_client_name("phase1-test");

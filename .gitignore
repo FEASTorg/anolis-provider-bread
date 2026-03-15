@@ -50,3 +50,6 @@ dist/
 reference/
 working/
 planning/
+
+# Logs
+*.log

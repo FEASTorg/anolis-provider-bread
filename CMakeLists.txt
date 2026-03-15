@@ -158,6 +158,7 @@ add_library(anolis_provider_bread_core STATIC
     src/core/handlers.cpp
     src/core/health.cpp
     src/core/runtime_state.cpp
+    src/core/startup.cpp
     src/core/transport/framed_stdio.cpp
     src/devices/common/bread_compatibility.cpp
     src/devices/common/stub_inventory.cpp
@@ -167,6 +168,7 @@ target_link_libraries(anolis_provider_bread_core
     PUBLIC
         adpp_proto
         anolis_provider_bread_bread_contracts
+        anolis_provider_bread_crumbs
         anolis_provider_bread_support
         protobuf::libprotobuf
 )

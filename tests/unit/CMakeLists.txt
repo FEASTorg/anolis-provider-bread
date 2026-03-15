@@ -3,6 +3,7 @@ add_executable(provider_unit_tests
     crumbs_session_test.cpp
     provider_config_test.cpp
     proto_smoke_test.cpp
+    startup_discovery_test.cpp
     stub_inventory_test.cpp
 )
 
