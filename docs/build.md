@@ -1,6 +1,6 @@
 # Build Notes
 
-Phase 0 establishes the build and dependency foundation for `anolis-provider-bread`.
+Phase 1 establishes the ADPP provider shell for `anolis-provider-bread`.
 
 ## Workspace Layout
 
@@ -25,7 +25,7 @@ repos_feast/
 
 ## Foundation-Only Configure
 
-Use the foundation path when you only want the config and protocol scaffolding.
+Use the foundation path when you want the config-backed shell without Linux hardware integration.
 
 On Windows with MSVC:
 
@@ -37,7 +37,7 @@ ctest --preset dev-windows-foundation-debug
 
 On non-Windows hosts:
 
-```powershell
+```bash
 cmake --preset dev-foundation-debug
 cmake --build --preset dev-foundation-debug
 ctest --preset dev-foundation-debug
@@ -57,24 +57,27 @@ ctest --preset dev-linux-debug
 
 This preset expects sibling repos for `CRUMBS`, `bread-crumbs-contracts`, and `linux-wire`.
 
-## Config Check
+## Running The Shell Manually
 
-The Phase 0 executable only validates config loading and the generated ADPP bindings.
+The Phase 1 provider uses framed stdio and a config-seeded inventory.
 
-PowerShell:
+Validate config only:
 
 ```powershell
 .\build\dev-windows-foundation-debug\Debug\anolis-provider-bread.exe --check-config config\example.local.yaml
 ```
 
-Non-Windows single-config builds:
+Start the provider shell for ADPP clients:
 
-```bash
-./build/dev-foundation-debug/anolis-provider-bread --check-config config/example.local.yaml
+```powershell
+.\build\dev-windows-foundation-debug\Debug\anolis-provider-bread.exe --config config\example.local.yaml
 ```
+
+The committed stub config seeds one RLHT and one DCMT device so `Hello`, `WaitReady`, `ListDevices`, `DescribeDevice`, and `GetHealth` are testable before real hardware work begins.
 
 ## Notes
 
 - Hardware integration is intentionally gated behind `ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE`.
 - When hardware integration is enabled, the parent build should add `linux-wire` before `CRUMBS`.
 - Current BREAD headers include CRUMBS headers directly, so future device adapter targets should link through the local `anolis_provider_bread_bread_contracts` interface target.
+- In Phase 1, `ReadSignals` and `Call` are intentionally present but return `CODE_UNIMPLEMENTED` after validating device and identifier existence.

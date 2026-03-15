@@ -1,5 +1,8 @@
 #include "config/provider_config.hpp"
 
+#include <filesystem>
+#include <iomanip>
+#include <regex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -9,6 +12,8 @@
 
 namespace anolis_provider_bread {
 namespace {
+
+const std::regex kIdentifierPattern("^[A-Za-z0-9_.-]{1,64}$");
 
 void ensure_map(const YAML::Node &node, const std::string &field_name) {
     if(!node || !node.IsMap()) {
@@ -32,11 +37,17 @@ std::string require_scalar(const YAML::Node &node, const std::string &field_name
         throw std::runtime_error(field_name + " must be a scalar");
     }
 
-    const std::string value = node.as<std::string>();
+    const std::string value = node.Scalar();
     if(value.empty()) {
         throw std::runtime_error(field_name + " must not be empty");
     }
     return value;
+}
+
+void validate_identifier(const std::string &value, const std::string &field_name) {
+    if(!std::regex_match(value, kIdentifierPattern)) {
+        throw std::runtime_error(field_name + " must match ^[A-Za-z0-9_.-]{1,64}$");
+    }
 }
 
 int parse_int_value(const YAML::Node &node,
@@ -58,8 +69,7 @@ int parse_int_value(const YAML::Node &node,
     }
 }
 
-int parse_address_value(const YAML::Node &node, const std::string &field_name) {
-    const std::string text = require_scalar(node, field_name);
+int parse_address_text(const std::string &text, const std::string &field_name) {
     const int base = (text.size() > 2 && text[0] == '0' &&
                       (text[1] == 'x' || text[1] == 'X'))
                          ? 16
@@ -78,6 +88,10 @@ int parse_address_value(const YAML::Node &node, const std::string &field_name) {
     }
 }
 
+int parse_address_value(const YAML::Node &node, const std::string &field_name) {
+    return parse_address_text(require_scalar(node, field_name), field_name);
+}
+
 } // namespace
 
 DiscoveryMode parse_discovery_mode(const std::string &value) {
@@ -91,6 +105,17 @@ DiscoveryMode parse_discovery_mode(const std::string &value) {
     throw std::runtime_error("Invalid discovery.mode: '" + value + "'");
 }
 
+DeviceType parse_device_type(const std::string &value) {
+    if(value == "rlht") {
+        return DeviceType::Rlht;
+    }
+    if(value == "dcmt") {
+        return DeviceType::Dcmt;
+    }
+
+    throw std::runtime_error("Invalid devices[].type: '" + value + "'");
+}
+
 std::string to_string(DiscoveryMode mode) {
     switch(mode) {
     case DiscoveryMode::Scan:
@@ -102,6 +127,23 @@ std::string to_string(DiscoveryMode mode) {
     return "unknown";
 }
 
+std::string to_string(DeviceType type) {
+    switch(type) {
+    case DeviceType::Rlht:
+        return "rlht";
+    case DeviceType::Dcmt:
+        return "dcmt";
+    }
+
+    return "unknown";
+}
+
+std::string format_i2c_address(int address) {
+    std::ostringstream out;
+    out << "0x" << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << address;
+    return out.str();
+}
+
 ProviderConfig load_config(const std::string &path) {
     YAML::Node root;
     try {
@@ -111,10 +153,10 @@ ProviderConfig load_config(const std::string &path) {
     }
 
     ensure_map(root, "root");
-    reject_unknown_keys(root, "root", {"provider", "hardware", "discovery"});
+    reject_unknown_keys(root, "root", {"provider", "hardware", "discovery", "devices"});
 
     ProviderConfig config;
-    config.config_file_path = path;
+    config.config_file_path = std::filesystem::absolute(path).string();
 
     const YAML::Node provider_node = root["provider"];
     if(provider_node) {
@@ -122,6 +164,7 @@ ProviderConfig load_config(const std::string &path) {
         reject_unknown_keys(provider_node, "provider", {"name"});
         if(provider_node["name"]) {
             config.provider_name = require_scalar(provider_node["name"], "provider.name");
+            validate_identifier(config.provider_name, "provider.name");
         }
     }
 
@@ -163,12 +206,58 @@ ProviderConfig load_config(const std::string &path) {
             const std::string field_name = "discovery.addresses[" + std::to_string(i) + "]";
             const int address = parse_address_value(addresses_node[i], field_name);
             if(!seen.insert(address).second) {
-                throw std::runtime_error("Duplicate discovery address: " + std::to_string(address));
+                throw std::runtime_error("Duplicate discovery address: " + format_i2c_address(address));
             }
             config.manual_addresses.push_back(address);
         }
     } else if(addresses_node && addresses_node.size() > 0) {
         throw std::runtime_error("discovery.addresses is only valid when discovery.mode=manual");
+    }
+
+    const YAML::Node devices_node = root["devices"];
+    if(devices_node) {
+        if(!devices_node.IsSequence()) {
+            throw std::runtime_error("devices must be a sequence");
+        }
+
+        std::set<std::string> seen_ids;
+        std::set<int> seen_addresses;
+        for(std::size_t i = 0; i < devices_node.size(); ++i) {
+            const YAML::Node device_node = devices_node[i];
+            if(!device_node.IsMap()) {
+                throw std::runtime_error("devices[" + std::to_string(i) + "] must be a map");
+            }
+
+            reject_unknown_keys(device_node, "devices[" + std::to_string(i) + "]", {"id", "type", "label", "address"});
+
+            if(!device_node["id"]) {
+                throw std::runtime_error("devices[" + std::to_string(i) + "].id is required");
+            }
+            if(!device_node["type"]) {
+                throw std::runtime_error("devices[" + std::to_string(i) + "].type is required");
+            }
+            if(!device_node["address"]) {
+                throw std::runtime_error("devices[" + std::to_string(i) + "].address is required");
+            }
+
+            DeviceSpec spec;
+            spec.id = require_scalar(device_node["id"], "devices[" + std::to_string(i) + "].id");
+            validate_identifier(spec.id, "devices[" + std::to_string(i) + "].id");
+            spec.type = parse_device_type(require_scalar(device_node["type"], "devices[" + std::to_string(i) + "].type"));
+            spec.label = device_node["label"]
+                             ? require_scalar(device_node["label"], "devices[" + std::to_string(i) + "].label")
+                             : spec.id;
+            spec.address = parse_address_value(device_node["address"], "devices[" + std::to_string(i) + "].address");
+
+            if(!seen_ids.insert(spec.id).second) {
+                throw std::runtime_error("Duplicate devices[].id: '" + spec.id + "'");
+            }
+            if(!seen_addresses.insert(spec.address).second) {
+                throw std::runtime_error("Duplicate devices[].address: '" + format_i2c_address(spec.address) + "'");
+            }
+
+            config.devices.push_back(spec);
+        }
     }
 
     return config;
@@ -181,7 +270,8 @@ std::string summarize_config(const ProviderConfig &config) {
         << ", hardware.query_delay_us=" << config.query_delay_us
         << ", hardware.timeout_ms=" << config.timeout_ms
         << ", hardware.retry_count=" << config.retry_count
-        << ", discovery.mode=" << to_string(config.discovery_mode);
+        << ", discovery.mode=" << to_string(config.discovery_mode)
+        << ", devices=" << config.devices.size();
 
     if(config.discovery_mode == DiscoveryMode::Manual) {
         out << ", discovery.addresses=[";
@@ -189,7 +279,7 @@ std::string summarize_config(const ProviderConfig &config) {
             if(i > 0) {
                 out << ", ";
             }
-            out << config.manual_addresses[i];
+            out << format_i2c_address(config.manual_addresses[i]);
         }
         out << "]";
     }

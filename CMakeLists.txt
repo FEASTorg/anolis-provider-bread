@@ -62,17 +62,32 @@ add_library(anolis_provider_bread_support STATIC
     src/logging/logger.cpp
 )
 
-target_include_directories(anolis_provider_bread_support
-    PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+target_include_directories(anolis_provider_bread_support PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_link_libraries(anolis_provider_bread_support PUBLIC yaml-cpp::yaml-cpp)
+target_compile_definitions(anolis_provider_bread_support PUBLIC
+    ANOLIS_PROVIDER_BREAD_VERSION="${PROJECT_VERSION}"
 )
-
-target_link_libraries(anolis_provider_bread_support
-    PUBLIC
-        yaml-cpp::yaml-cpp
-)
-
 anolis_provider_bread_apply_warnings(anolis_provider_bread_support)
+
+add_library(anolis_provider_bread_core STATIC
+    src/core/handlers.cpp
+    src/core/health.cpp
+    src/core/runtime_state.cpp
+    src/core/transport/framed_stdio.cpp
+    src/devices/common/stub_inventory.cpp
+)
+
+target_include_directories(anolis_provider_bread_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_link_libraries(anolis_provider_bread_core
+    PUBLIC
+        adpp_proto
+        anolis_provider_bread_support
+        protobuf::libprotobuf
+)
+target_compile_definitions(anolis_provider_bread_core PUBLIC
+    ANOLIS_PROVIDER_BREAD_VERSION="${PROJECT_VERSION}"
+)
+anolis_provider_bread_apply_warnings(anolis_provider_bread_core)
 
 if(ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE)
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -137,37 +152,19 @@ if(ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE)
     )
 endif()
 
-add_executable(anolis-provider-bread
-    src/core/main.cpp
+add_executable(anolis-provider-bread src/core/main.cpp)
+target_include_directories(anolis-provider-bread PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_link_libraries(anolis-provider-bread PRIVATE anolis_provider_bread_core)
+target_compile_definitions(anolis-provider-bread PRIVATE
+    ANOLIS_PROVIDER_BREAD_VERSION="${PROJECT_VERSION}"
 )
-
-target_include_directories(anolis-provider-bread
-    PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
-
-target_link_libraries(anolis-provider-bread
-    PRIVATE
-        adpp_proto
-        anolis_provider_bread_support
-        protobuf::libprotobuf
-)
-
-if(ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE)
-    target_link_libraries(anolis-provider-bread PRIVATE anolis_provider_bread_bread_contracts)
-    target_compile_definitions(anolis-provider-bread PRIVATE ANOLIS_PROVIDER_BREAD_HAVE_HARDWARE=1)
-endif()
-
 anolis_provider_bread_apply_warnings(anolis-provider-bread)
 
 if(WIN32)
     target_compile_definitions(anolis_provider_bread_support PUBLIC _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(anolis_provider_bread_core PUBLIC _CRT_SECURE_NO_WARNINGS)
     target_compile_definitions(anolis-provider-bread PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
-
-target_compile_definitions(anolis-provider-bread PRIVATE
-    ANOLIS_PROVIDER_BREAD_VERSION="${PROJECT_VERSION}"
-)
 
 if(BUILD_TESTING)
     find_package(GTest CONFIG REQUIRED)

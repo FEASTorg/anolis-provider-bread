@@ -25,7 +25,7 @@ std::ostream &stream_for(Level level) {
 } // namespace
 
 void log(Level level, const std::string &message) {
-    stream_for(level) << to_prefix(level) << ' ' << message << '\n';
+    stream_for(level) << to_prefix(level) << ' ' << message << std::endl;
 }
 
 void info(const std::string &message) {

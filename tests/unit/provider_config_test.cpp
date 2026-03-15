@@ -81,22 +81,37 @@ discovery:
     EXPECT_EQ(parsed.retry_count, 2);
     EXPECT_EQ(parsed.discovery_mode, DiscoveryMode::Scan);
     EXPECT_TRUE(parsed.manual_addresses.empty());
+    EXPECT_TRUE(parsed.devices.empty());
 }
 
-TEST(ProviderConfigTest, ParsesManualDiscoveryAddresses) {
+TEST(ProviderConfigTest, ParsesManualDiscoveryAddressesAndDevices) {
     const TempConfigFile config(R"(
+provider:
+  name: bread.lab-1
 hardware:
   bus_path: /dev/i2c-1
   retry_count: 3
 discovery:
   mode: manual
   addresses: [0x08, 9]
+devices:
+  - id: rlht0
+    type: rlht
+    label: Left Heater
+    address: 0x08
+  - id: dcmt0
+    type: dcmt
+    address: 9
 )");
 
     const ProviderConfig parsed = load_config(config.path().string());
     ASSERT_EQ(parsed.manual_addresses.size(), 2U);
-    EXPECT_EQ(parsed.manual_addresses[0], 0x08);
-    EXPECT_EQ(parsed.manual_addresses[1], 0x09);
+    ASSERT_EQ(parsed.devices.size(), 2U);
+    EXPECT_EQ(parsed.devices[0].type, DeviceType::Rlht);
+    EXPECT_EQ(parsed.devices[0].label, "Left Heater");
+    EXPECT_EQ(parsed.devices[1].type, DeviceType::Dcmt);
+    EXPECT_EQ(parsed.devices[1].label, "dcmt0");
+    EXPECT_EQ(parsed.devices[1].address, 0x09);
 }
 
 TEST(ProviderConfigTest, RejectsMissingHardwareBusPath) {
@@ -135,6 +150,51 @@ discovery:
   mode: scan
 unexpected: true
 )", "Unknown root key");
+}
+
+TEST(ProviderConfigTest, RejectsUnknownDeviceType) {
+    expect_config_error(R"(
+hardware:
+  bus_path: /dev/i2c-1
+discovery:
+  mode: scan
+devices:
+  - id: foo0
+    type: fancy
+    address: 0x08
+)", "Invalid devices[].type");
+}
+
+TEST(ProviderConfigTest, RejectsDuplicateDeviceIds) {
+    expect_config_error(R"(
+hardware:
+  bus_path: /dev/i2c-1
+discovery:
+  mode: scan
+devices:
+  - id: rlht0
+    type: rlht
+    address: 0x08
+  - id: rlht0
+    type: dcmt
+    address: 0x09
+)", "Duplicate devices[].id");
+}
+
+TEST(ProviderConfigTest, RejectsDuplicateDeviceAddresses) {
+    expect_config_error(R"(
+hardware:
+  bus_path: /dev/i2c-1
+discovery:
+  mode: scan
+devices:
+  - id: rlht0
+    type: rlht
+    address: 0x08
+  - id: dcmt0
+    type: dcmt
+    address: 8
+)", "Duplicate devices[].address");
 }
 
 } // namespace anolis_provider_bread

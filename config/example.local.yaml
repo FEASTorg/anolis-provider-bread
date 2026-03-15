@@ -8,4 +8,15 @@ hardware:
   retry_count: 2
 
 discovery:
-  mode: scan
+  mode: manual
+  addresses: [0x08, 0x09]
+
+devices:
+  - id: rlht0
+    type: rlht
+    label: Reactor Left Heater
+    address: 0x08
+  - id: dcmt0
+    type: dcmt
+    label: Conveyor Drive
+    address: 0x09
