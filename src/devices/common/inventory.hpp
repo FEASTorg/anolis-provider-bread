@@ -51,8 +51,6 @@ struct InventoryDevice {
     CapabilityProfile capability_profile;
 };
 
-using StubDevice = InventoryDevice;
-
 struct InventoryBuildResult {
     std::vector<InventoryDevice> supported_devices;
     std::vector<ProbeRecord> unsupported_probes;

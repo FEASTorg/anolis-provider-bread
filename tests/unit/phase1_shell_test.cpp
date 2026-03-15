@@ -380,7 +380,7 @@ TEST(Phase1ShellTest, SupportsHelloInventoryAndHealth) {
         read_signals.mutable_read_signals()->set_device_id("rlht0");
         read_signals.mutable_read_signals()->add_signal_ids("t1_c");
         const auto response = session.send(read_signals);
-        EXPECT_EQ(response.status().code(), anolis::deviceprovider::v1::Status::CODE_UNIMPLEMENTED);
+        EXPECT_EQ(response.status().code(), anolis::deviceprovider::v1::Status::CODE_UNAVAILABLE);
     }
 
     {
@@ -390,7 +390,7 @@ TEST(Phase1ShellTest, SupportsHelloInventoryAndHealth) {
         call.mutable_call()->set_device_id("dcmt0");
         call.mutable_call()->set_function_id(1);
         const auto response = session.send(call);
-        EXPECT_EQ(response.status().code(), anolis::deviceprovider::v1::Status::CODE_UNIMPLEMENTED);
+        EXPECT_EQ(response.status().code(), anolis::deviceprovider::v1::Status::CODE_UNAVAILABLE);
     }
 
     {

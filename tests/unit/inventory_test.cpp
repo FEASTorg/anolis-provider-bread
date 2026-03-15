@@ -1,5 +1,5 @@
 #include "config/provider_config.hpp"
-#include "devices/common/stub_inventory.hpp"
+#include "devices/common/inventory.hpp"
 
 #include <gtest/gtest.h>
 

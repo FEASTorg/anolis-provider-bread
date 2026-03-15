@@ -7,7 +7,7 @@
 #include "config/provider_config.hpp"
 #include "crumbs/session.hpp"
 #include "devices/common/bread_compatibility.hpp"
-#include "devices/common/stub_inventory.hpp"
+#include "devices/common/inventory.hpp"
 
 extern "C" {
 #include <bread/bread_caps.h>

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "config/provider_config.hpp"
-#include "devices/common/stub_inventory.hpp"
+#include "devices/common/inventory.hpp"
 
 // Forward declaration — callers that need the full Session type must include
 // crumbs/session.hpp themselves.
@@ -17,7 +17,7 @@ namespace anolis_provider_bread::runtime {
 
 struct RuntimeState {
     ProviderConfig config;
-    std::vector<inventory::StubDevice> devices;
+    std::vector<inventory::InventoryDevice> devices;
     bool ready = false;
     std::string startup_message;
     std::chrono::system_clock::time_point started_at;

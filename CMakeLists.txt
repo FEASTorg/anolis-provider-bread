@@ -161,7 +161,7 @@ add_library(anolis_provider_bread_core STATIC
     src/core/startup.cpp
     src/core/transport/framed_stdio.cpp
     src/devices/common/bread_compatibility.cpp
-    src/devices/common/stub_inventory.cpp
+    src/devices/common/inventory.cpp
 )
 target_include_directories(anolis_provider_bread_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_link_libraries(anolis_provider_bread_core

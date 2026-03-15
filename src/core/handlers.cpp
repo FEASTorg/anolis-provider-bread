@@ -5,7 +5,7 @@
 #include "core/health.hpp"
 #include "core/runtime_state.hpp"
 #include "core/transport/framed_stdio.hpp"
-#include "devices/common/stub_inventory.hpp"
+#include "devices/common/inventory.hpp"
 
 namespace anolis_provider_bread::handlers {
 namespace {
@@ -30,7 +30,7 @@ void set_status(Response &response, Status::Code code, const std::string &messag
     response.mutable_status()->set_message(message);
 }
 
-const inventory::StubDevice *require_device(const runtime::RuntimeState &state,
+const inventory::InventoryDevice *require_device(const runtime::RuntimeState &state,
                                             const std::string &device_id,
                                             Response &response) {
     if(device_id.empty()) {
@@ -38,7 +38,7 @@ const inventory::StubDevice *require_device(const runtime::RuntimeState &state,
         return nullptr;
     }
 
-    const inventory::StubDevice *device = inventory::find_device(state.devices, device_id);
+    const inventory::InventoryDevice *device = inventory::find_device(state.devices, device_id);
     if(!device) {
         set_status(response, Status::CODE_NOT_FOUND, "unknown device_id");
         return nullptr;
@@ -89,7 +89,7 @@ void handle_list_devices(const ListDevicesRequest &request, Response &response) 
 
 void handle_describe_device(const DescribeDeviceRequest &request, Response &response) {
     const runtime::RuntimeState state = runtime::snapshot();
-    const inventory::StubDevice *device = require_device(state, request.device_id(), response);
+    const inventory::InventoryDevice *device = require_device(state, request.device_id(), response);
     if(!device) {
         return;
     }
@@ -102,7 +102,7 @@ void handle_describe_device(const DescribeDeviceRequest &request, Response &resp
 
 void handle_read_signals(const ReadSignalsRequest &request, Response &response) {
     const runtime::RuntimeState state = runtime::snapshot();
-    const inventory::StubDevice *device = require_device(state, request.device_id(), response);
+    const inventory::InventoryDevice *device = require_device(state, request.device_id(), response);
     if(!device) {
         return;
     }
@@ -115,13 +115,13 @@ void handle_read_signals(const ReadSignalsRequest &request, Response &response) 
         }
     }
 
-    set_status(response, Status::CODE_UNIMPLEMENTED,
-               "ReadSignals is not implemented in Phase 1");
+    set_status(response, Status::CODE_UNAVAILABLE,
+               "ReadSignals: hardware adapter not yet wired (Phase 4)");
 }
 
 void handle_call(const CallRequest &request, Response &response) {
     const runtime::RuntimeState state = runtime::snapshot();
-    const inventory::StubDevice *device = require_device(state, request.device_id(), response);
+    const inventory::InventoryDevice *device = require_device(state, request.device_id(), response);
     if(!device) {
         return;
     }
@@ -135,8 +135,8 @@ void handle_call(const CallRequest &request, Response &response) {
         return;
     }
 
-    set_status(response, Status::CODE_UNIMPLEMENTED,
-               "Call is not implemented in Phase 1");
+    set_status(response, Status::CODE_UNAVAILABLE,
+               "Call: hardware adapter not yet wired (Phase 4)");
 }
 
 void handle_get_health(const GetHealthRequest &, Response &response) {
