@@ -68,6 +68,9 @@ inventory::ProbeRecord probe_device(crumbs::Session &session, uint8_t address) {
         probe.status = inventory::ProbeStatus::VersionReadFailed;
         probe.detail = "version payload too short (" +
                        std::to_string(version_frame.payload.size()) + " bytes)";
+        logging::warning("probe " + format_i2c_address(static_cast<int>(address)) +
+                         " version payload too short (" +
+                         std::to_string(version_frame.payload.size()) + " bytes)");
         return probe;
     }
 
@@ -80,6 +83,8 @@ inventory::ProbeRecord probe_device(crumbs::Session &session, uint8_t address) {
                             &crumbs_ver, &mod_major, &mod_minor, &mod_patch) != 0) {
         probe.status = inventory::ProbeStatus::VersionReadFailed;
         probe.detail = "failed to parse version payload";
+        logging::warning("probe " + format_i2c_address(static_cast<int>(address)) +
+                         " failed to parse version payload");
         return probe;
     }
 

@@ -77,17 +77,17 @@ int main(int argc, char **argv) {
             return 0;
         }
 
-        anolis_provider_bread::runtime::initialize(config);
         anolis_provider_bread::logging::info(
             "starting provider shell with config: " +
             anolis_provider_bread::summarize_config(config));
+        anolis_provider_bread::runtime::initialize(config);
     } catch(const std::exception &e) {
         anolis_provider_bread::logging::error(e.what());
         return 1;
     }
 
     set_binary_mode_stdio();
-    anolis_provider_bread::logging::info("starting (transport=stdio+uint32_le)");
+    anolis_provider_bread::logging::info("ready (transport=stdio+uint32_le)");
 
     std::vector<uint8_t> frame;
     std::string io_error;

@@ -9,6 +9,7 @@
 #include "devices/common/inventory.hpp"
 #include "devices/dcmt/dcmt_adapter.hpp"
 #include "devices/rlht/rlht_adapter.hpp"
+#include "logging/logger.hpp"
 
 namespace anolis_provider_bread::handlers {
 namespace {
@@ -139,6 +140,8 @@ void handle_read_signals(const ReadSignalsRequest &request, Response &response) 
     }
 
     if(!adapter_result.ok) {
+        logging::warning("read_signals device='" + request.device_id() +
+                         "' failed: " + adapter_result.error_message);
         set_status(response, adapter_result.error_code, adapter_result.error_message);
         return;
     }
@@ -196,6 +199,12 @@ void handle_call(const CallRequest &request, Response &response) {
     }
 
     if(!adapter_result.ok) {
+        const std::string fn_label = request.function_name().empty()
+            ? std::to_string(request.function_id())
+            : request.function_name();
+        logging::warning("call device='" + request.device_id() +
+                         "' fn='" + fn_label +
+                         "' failed: " + adapter_result.error_message);
         set_status(response, adapter_result.error_code, adapter_result.error_message);
         return;
     }
