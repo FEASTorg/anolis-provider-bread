@@ -2,9 +2,7 @@
 
 BREAD hardware provider for the Anolis runtime.
 
-This repository is intentionally scoped to **BREAD-over-CRUMBS** for the first real hardware
-provider. It will be implemented with clean internal boundaries so CRUMBS-host pieces can be
-extracted later if a broader multi-family use case becomes real.
+This repository is intentionally scoped to **BREAD-over-CRUMBS** for the first real hardware provider. It will be implemented with clean internal boundaries so reusable CRUMBS session and bus-management pieces can be extracted later if a broader multi-family use case becomes real.
 
 Repository documentation:
 
