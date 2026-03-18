@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
         }
 
         anolis_provider_bread::logging::info(
-            "starting provider shell with config: " +
+            "starting with config: " +
             anolis_provider_bread::summarize_config(config));
         anolis_provider_bread::runtime::initialize(config);
     } catch(const std::exception &e) {

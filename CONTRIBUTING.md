@@ -77,7 +77,7 @@ This requires the sibling `linux-wire` repo and a real I2C bus.
 ## Repo Conventions
 
 - **`docs/`** — committed, stable documentation. Keep it short and accurate.
-- **`working/`** — planning notes, scratch, phase breakdowns. Not tracked by git. Write freely here without concern for permanence.
+- **`working/`** — planning notes and scratch. Not tracked by git.
 - **`config/`** — example configs committed to the repo. The `*.local.yaml` pattern is gitignored for machine-specific overrides.
 - Log messages are intended for operators and developers, not for programmatic parsing. Message text is not stable across releases.
 

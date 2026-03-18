@@ -90,7 +90,7 @@ When `bread-crumbs-contracts` releases a new version:
 The `GetHealth` RPC metrics include the provider inventory mode and device count but not the version string directly. The version is printed to stderr at startup:
 
 ```
-[INFO] starting provider shell with config: ...
+[INFO] starting with config: ...
 ```
 
 The full version string is embedded in the binary as `ANOLIS_PROVIDER_BREAD_VERSION` (`0.1.0` in the current build).
