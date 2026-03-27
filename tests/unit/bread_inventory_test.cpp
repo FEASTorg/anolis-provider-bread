@@ -59,6 +59,8 @@ TEST(BreadInventoryTest, DiscoveryInventoryAssignsStableGeneratedIdsByTypeAndAdd
     EXPECT_EQ(result.supported_devices[1].descriptor.device_id(), "dcmt0");
     EXPECT_EQ(result.supported_devices[2].descriptor.device_id(), "rlht1");
     EXPECT_EQ(result.supported_devices[0].descriptor.tags().at("inventory"), "discovered");
+    EXPECT_EQ(result.supported_devices[0].descriptor.tags().at("hw.bus_path"), "/dev/i2c-1");
+    EXPECT_EQ(result.supported_devices[0].descriptor.tags().at("hw.i2c_address"), "0x08");
 }
 
 TEST(BreadInventoryTest, ManualInventoryPreservesConfiguredIdentityAndTracksMissingExpected) {

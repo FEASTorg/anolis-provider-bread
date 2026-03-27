@@ -21,6 +21,8 @@ TEST(StubInventoryTest, BuildsSeedInventoryForConfiguredDevices) {
     EXPECT_EQ(inventory_devices[0].descriptor.device_id(), "rlht0");
     EXPECT_EQ(inventory_devices[0].descriptor.type_id(), "bread.rlht");
     EXPECT_EQ(inventory_devices[0].descriptor.address(), "0x08");
+    EXPECT_EQ(inventory_devices[0].descriptor.tags().at("hw.bus_path"), "/dev/i2c-1");
+    EXPECT_EQ(inventory_devices[0].descriptor.tags().at("hw.i2c_address"), "0x08");
     EXPECT_EQ(inventory_devices[1].descriptor.type_id(), "bread.dcmt");
 
     EXPECT_EQ(inventory_devices[0].capabilities.functions_size(), 6);

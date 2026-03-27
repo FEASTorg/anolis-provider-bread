@@ -268,6 +268,7 @@ InventoryDevice build_device(const ProviderConfig &config,
                              const std::string &device_id,
                              const std::string &label) {
     InventoryDevice device;
+    const std::string formatted_address = format_i2c_address(probe.address);
     device.type = type;
     device.address = probe.address;
     device.source = source;
@@ -278,10 +279,14 @@ InventoryDevice build_device(const ProviderConfig &config,
     device.descriptor.set_device_id(device_id);
     device.descriptor.set_provider_name(config.provider_name);
     device.descriptor.set_label(label);
-    device.descriptor.set_address(format_i2c_address(probe.address));
+    device.descriptor.set_address(formatted_address);
     device.descriptor.set_type_id(provider_type_id(type));
     device.descriptor.set_type_version(std::to_string(
         device.version.module_major == 0 ? 1 : static_cast<int>(device.version.module_major)));
+    device.descriptor.mutable_tags()->insert({"hw.bus_path", config.bus_path});
+    device.descriptor.mutable_tags()->insert({"hw.i2c_address", formatted_address});
+    device.descriptor.mutable_tags()->insert({"bus_path", config.bus_path});
+    device.descriptor.mutable_tags()->insert({"i2c_address", formatted_address});
     device.descriptor.mutable_tags()->insert({"family", "bread"});
     device.descriptor.mutable_tags()->insert({"inventory", to_string(source)});
     device.descriptor.mutable_tags()->insert({"contract", bread_contract_name(type)});
