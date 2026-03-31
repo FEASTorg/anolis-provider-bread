@@ -97,6 +97,10 @@ ctest --preset dev-linux-hardware-debug
 This preset enables `ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE=ON` and expects sibling repos for
 `CRUMBS`, `bread-crumbs-contracts`, and `linux-wire`.
 
+On ARM hosts (for example Raspberry Pi), the preset now uses vcpkg's host-default triplet.
+If you need an explicit override, pass `-DVCPKG_TARGET_TRIPLET=<triplet>` (and optionally
+`-DVCPKG_HOST_TRIPLET=<triplet>`) on configure.
+
 ## Running The Provider Manually
 
 Validate config only:

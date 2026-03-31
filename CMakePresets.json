@@ -75,8 +75,7 @@
       "inherits": "linux-hardware-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE": "ON",
-        "VCPKG_TARGET_TRIPLET": "x64-linux"
+        "ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE": "ON"
       }
     },
     {
@@ -84,8 +83,7 @@
       "inherits": "linux-hardware-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE": "ON",
-        "VCPKG_TARGET_TRIPLET": "x64-linux"
+        "ANOLIS_PROVIDER_BREAD_ENABLE_HARDWARE": "ON"
       }
     },
     {
