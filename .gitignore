@@ -6,6 +6,7 @@ build/
 out/
 build-*/
 dist/
+artifacts/
 
 # Compiled Object files
 *.slo
