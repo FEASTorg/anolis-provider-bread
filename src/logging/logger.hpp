@@ -5,9 +5,9 @@
 namespace anolis_provider_bread::logging {
 
 enum class Level {
-    Info,
-    Warning,
-    Error,
+  Info,
+  Warning,
+  Error,
 };
 
 void log(Level level, const std::string &message);

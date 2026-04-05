@@ -2,7 +2,8 @@
 
 /**
  * @file provider_config.hpp
- * @brief Manual configuration types and parsing entry points for anolis-provider-bread.
+ * @brief Manual configuration types and parsing entry points for
+ * anolis-provider-bread.
  */
 
 #include <string>
@@ -14,16 +15,16 @@ namespace anolis_provider_bread {
  * @brief Inventory acquisition mode for provider startup.
  */
 enum class DiscoveryMode {
-    Scan,
-    Manual,
+  Scan,
+  Manual,
 };
 
 /**
  * @brief Supported BREAD device families exposed by this provider.
  */
 enum class DeviceType {
-    Rlht,
-    Dcmt,
+  Rlht,
+  Dcmt,
 };
 
 /**
@@ -33,10 +34,10 @@ enum class DeviceType {
  * name and validate devices during discovery.
  */
 struct DeviceSpec {
-    std::string id;
-    DeviceType type = DeviceType::Rlht;
-    std::string label;
-    int address = 0;
+  std::string id;
+  DeviceType type = DeviceType::Rlht;
+  std::string label;
+  int address = 0;
 };
 
 /**
@@ -47,16 +48,16 @@ struct DeviceSpec {
  * builds instead of falling back to config-seeded inventory.
  */
 struct ProviderConfig {
-    std::string config_file_path;
-    std::string provider_name = "anolis-provider-bread";
-    std::string bus_path;
-    bool require_live_session = false;
-    int query_delay_us = 10000;
-    int timeout_ms = 100;
-    int retry_count = 2;
-    DiscoveryMode discovery_mode = DiscoveryMode::Scan;
-    std::vector<int> manual_addresses;
-    std::vector<DeviceSpec> devices;
+  std::string config_file_path;
+  std::string provider_name = "anolis-provider-bread";
+  std::string bus_path;
+  bool require_live_session = false;
+  int query_delay_us = 10000;
+  int timeout_ms = 100;
+  int retry_count = 2;
+  DiscoveryMode discovery_mode = DiscoveryMode::Scan;
+  std::vector<int> manual_addresses;
+  std::vector<DeviceSpec> devices;
 };
 
 /** @brief Load and validate provider configuration from disk. */

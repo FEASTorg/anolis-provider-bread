@@ -2,7 +2,8 @@
 
 /**
  * @file rlht_adapter.hpp
- * @brief RLHT-specific signal and function adapters on top of the generic CRUMBS session API.
+ * @brief RLHT-specific signal and function adapters on top of the generic
+ * CRUMBS session API.
  */
 
 #include <cstdint>
@@ -16,7 +17,8 @@
 namespace anolis_provider_bread::rlht {
 
 /**
- * @brief Read one coherent RLHT state snapshot and project it into ADPP signals.
+ * @brief Read one coherent RLHT state snapshot and project it into ADPP
+ * signals.
  *
  * Performs a single `RLHT_OP_GET_STATE` query regardless of which
  * `signal_ids` are requested. If `signal_ids` is empty all supported signals
@@ -39,7 +41,6 @@ AdapterReadResult read_signals(crumbs::Session &session,
  */
 AdapterCallResult call(crumbs::Session &session,
                        const inventory::InventoryDevice &device,
-                       uint32_t function_id,
-                       const ValueMap &args);
+                       uint32_t function_id, const ValueMap &args);
 
 } // namespace anolis_provider_bread::rlht

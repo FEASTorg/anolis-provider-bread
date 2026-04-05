@@ -16,39 +16,44 @@ namespace anolis_provider_bread::inventory {
  * @brief Outcome of probing one BREAD address for provider compatibility.
  */
 enum class ProbeStatus {
-    Supported,
-    UnsupportedType,
-    VersionReadFailed,
-    IncompatibleCrumbsVersion,
-    IncompatibleModuleMajor,
-    IncompatibleModuleMinor,
-    TypeMismatch,
+  Supported,
+  UnsupportedType,
+  VersionReadFailed,
+  IncompatibleCrumbsVersion,
+  IncompatibleModuleMajor,
+  IncompatibleModuleMinor,
+  TypeMismatch,
 };
 
 /**
  * @brief Version metadata reported by a probed BREAD module.
  */
 struct ModuleVersion {
-    uint16_t crumbs_version = 0;
-    uint8_t module_major = 0;
-    uint8_t module_minor = 0;
-    uint8_t module_patch = 0;
+  uint16_t crumbs_version = 0;
+  uint8_t module_major = 0;
+  uint8_t module_minor = 0;
+  uint8_t module_patch = 0;
 };
 
-/** @brief Convert a raw BREAD type identifier into a supported provider device type. */
+/** @brief Convert a raw BREAD type identifier into a supported provider device
+ * type. */
 bool try_parse_bread_type(uint8_t type_id, DeviceType &out);
 
-/** @brief Return the canonical BREAD type identifier for a supported provider device type. */
+/** @brief Return the canonical BREAD type identifier for a supported provider
+ * device type. */
 uint8_t bread_type_id(DeviceType type);
 
-/** @brief Return the short contract family name used in capability and probe reporting. */
+/** @brief Return the short contract family name used in capability and probe
+ * reporting. */
 std::string bread_contract_name(DeviceType type);
 
-/** @brief Return the provider-level type identifier published in device descriptors. */
+/** @brief Return the provider-level type identifier published in device
+ * descriptors. */
 std::string provider_type_id(DeviceType type);
 
 /**
- * @brief Evaluate whether a probed module version is supported by this provider build.
+ * @brief Evaluate whether a probed module version is supported by this provider
+ * build.
  *
  * Error handling:
  * Returns a specific incompatibility status instead of throwing. When `detail`
