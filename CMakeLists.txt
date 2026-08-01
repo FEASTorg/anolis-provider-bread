@@ -63,8 +63,8 @@ include(FetchContent)
 # tarball); local dev overrides with -DFETCHCONTENT_SOURCE_DIR_ANOLIS_PROVIDER_SDK=<path>.
 FetchContent_Declare(
     anolis_provider_sdk
-    URL https://github.com/anolishq/anolis-provider-sdk/releases/download/v0.1.4/anolis-provider-sdk-0.1.4-source.tar.gz
-    URL_HASH SHA256=32959808fb19048cd65690f5c3dfb7f874ad9c4ed9b770d51528263f01b8f81a
+    URL https://github.com/anolishq/anolis-provider-sdk/releases/download/v0.2.0/anolis-provider-sdk-0.2.0-source.tar.gz
+    URL_HASH SHA256=9e4a57f2e95aa142b22a2a3eabd6912210bb94b914591aeb4bf54923d5c1d93b
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(anolis_provider_sdk)
@@ -158,11 +158,17 @@ target_link_libraries(anolis_provider_bread_bread_contracts
 
 
 add_library(anolis_provider_bread_support STATIC
+    src/config/config_schema.cpp
     src/config/provider_config.cpp
     src/logging/logger.cpp
 )
 target_include_directories(anolis_provider_bread_support PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-target_link_libraries(anolis_provider_bread_support PUBLIC yaml-cpp::yaml-cpp)
+# The declare-once config toolkit (SDK): schema declaration + emitter +
+# validator + typed extraction, one contract for --config-schema and
+# --check-config.
+target_link_libraries(anolis_provider_bread_support PUBLIC
+    yaml-cpp::yaml-cpp
+    anolis::provider_sdk_config)
 target_compile_definitions(anolis_provider_bread_support PUBLIC
     ANOLIS_PROVIDER_BREAD_VERSION="${PROJECT_VERSION}"
 )

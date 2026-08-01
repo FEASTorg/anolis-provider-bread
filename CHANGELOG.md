@@ -13,6 +13,32 @@ commit messages only.
 
 ## [Unreleased]
 
+### Added
+
+- `--config-schema` (#122, executable profile v1 §2): prints the provider's
+  config JSON Schema in the versioned envelope, emitted from the SDK v0.2.0
+  declare-once toolkit. The SAME declaration now drives `--check-config`
+  validation (all errors reported at once, with dotted paths) and typed value
+  extraction — the advertised schema and the enforced validation cannot drift.
+  Titles/defaults/placeholders carry the form-authoring knowledge the
+  workbench previously hardcoded (anolis-workbench#270).
+
+### Changed
+
+- Config validation is schema-honest and STRICTER in corners the old
+  hand-written parser let through (all shipped configs unaffected): quoted
+  numerics (`timeout_ms: "300"`) and stoi trailing junk (`5abc`) are type
+  errors; plain non-string scalars against string fields (`bus_path: 123`,
+  `label: 5`, `id: 0x5`) are type errors; quoted decimal addresses (`"97"`)
+  are rejected (strict `0xNN` string form); `mode: scan` with ANY `addresses`
+  node (empty, null, or scalar included) is rejected; duplicated map keys are
+  rejected outright; integer fields carry explicit int32/u16 bounds. Two
+  loosenings that change accepted values: plain octal addresses (`0o141`) now
+  parse correctly instead of being misread as base-10 and rejected, and
+  generic integer fields honor `0x`/`0o` forms (`command_watchdog_ms: 0x10`
+  was silently 0 under stoi truncation — the watchdog never armed; it is 16
+  now).
+
 ## [0.3.7] - 2026-07-22
 
 ### Changed
