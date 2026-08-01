@@ -13,6 +13,8 @@ commit messages only.
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-08-01
+
 ### Added
 
 - `--config-schema` (#122, executable profile v1 §2): prints the provider's
