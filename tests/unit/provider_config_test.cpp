@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "config/config_schema.hpp"
+
 namespace anolis_provider_bread {
 namespace {
 
@@ -165,6 +167,92 @@ discovery:
                         "discovery.addresses");
 }
 
+TEST(ProviderConfigTest, SchemaDefaultsAgreeWithBinaryDefaults) {
+    // The schema's advertised defaults must be what the binary actually does
+    // when the key is absent — a workbench form is rendered from the schema.
+    const TempConfigFile config(R"(
+hardware:
+  bus_path: /dev/i2c-1
+discovery:
+  mode: scan
+)");
+    const ProviderConfig parsed = load_config(config.path().string());
+    const ProviderConfig defaults;
+    EXPECT_EQ(parsed.provider_name, defaults.provider_name);
+    EXPECT_EQ(parsed.query_delay_us, defaults.query_delay_us);
+    EXPECT_EQ(parsed.timeout_ms, defaults.timeout_ms);
+    EXPECT_EQ(parsed.retry_count, defaults.retry_count);
+
+    // ...and the declared schema carries those same values as its defaults.
+    // Found-flags keep the loop from passing vacuously if a key is renamed.
+    bool checked_name = false;
+    bool checked_hardware = false;
+    bool checked_watchdog = false;
+    const auto &root_spec = provider_schema().root().spec();
+    for (const auto &member : root_spec.members) {
+        if (member.key == "provider") {
+            for (const auto &field : member.object->spec().members) {
+                if (field.key == "name") {
+                    ASSERT_TRUE(field.field->spec().default_string.has_value());
+                    EXPECT_EQ(*field.field->spec().default_string, defaults.provider_name);
+                    checked_name = true;
+                }
+            }
+        }
+        if (member.key == "hardware") {
+            for (const auto &field : member.object->spec().members) {
+                if (!field.field.has_value()) {
+                    continue;
+                }
+                const auto &spec = field.field->spec();
+                if (field.key == "query_delay_us") {
+                    EXPECT_EQ(spec.default_int, defaults.query_delay_us);
+                }
+                if (field.key == "timeout_ms") {
+                    EXPECT_EQ(spec.default_int, defaults.timeout_ms);
+                }
+                if (field.key == "retry_count") {
+                    EXPECT_EQ(spec.default_int, defaults.retry_count);
+                    checked_hardware = true;
+                }
+            }
+        }
+        if (member.key == "devices") {
+            for (const auto &field : member.array->spec().item_object->spec().members) {
+                if (field.key == "command_watchdog_ms" && field.field.has_value()) {
+                    EXPECT_EQ(field.field->spec().default_int, DeviceSpec{}.command_watchdog_ms);
+                    checked_watchdog = true;
+                }
+            }
+        }
+    }
+    EXPECT_TRUE(checked_name);
+    EXPECT_TRUE(checked_hardware);
+    EXPECT_TRUE(checked_watchdog);
+}
+
+TEST(ProviderConfigTest, RejectsAddressesUnderScanMode) {
+    expect_config_error(R"(
+hardware:
+  bus_path: /dev/i2c-1
+discovery:
+  mode: scan
+  addresses: [0x08]
+)",
+                        "not valid when mode is 'scan'");
+}
+
+TEST(ProviderConfigTest, RejectsEmptyManualAddressList) {
+    expect_config_error(R"(
+hardware:
+  bus_path: /dev/i2c-1
+discovery:
+  mode: manual
+  addresses: []
+)",
+                        "at least 1 item");
+}
+
 TEST(ProviderConfigTest, RejectsDuplicateManualAddresses) {
     expect_config_error(R"(
 hardware:
@@ -173,7 +261,7 @@ discovery:
   mode: manual
   addresses: [0x08, 8]
 )",
-                        "Duplicate discovery address");
+                        "duplicate value");
 }
 
 TEST(ProviderConfigTest, RejectsUnknownRootKey) {
@@ -184,7 +272,7 @@ discovery:
   mode: scan
 unexpected: true
 )",
-                        "Unknown root key");
+                        "unknown key");
 }
 
 TEST(ProviderConfigTest, RejectsUnknownDeviceType) {
@@ -198,7 +286,7 @@ devices:
     type: fancy
     address: 0x08
 )",
-                        "Invalid devices[].type");
+                        "invalid value");
 }
 
 TEST(ProviderConfigTest, RejectsDuplicateDeviceIds) {
@@ -215,7 +303,7 @@ devices:
     type: dcmt
     address: 0x09
 )",
-                        "Duplicate devices[].id");
+                        "duplicate id");
 }
 
 TEST(ProviderConfigTest, RejectsDuplicateDeviceAddresses) {
@@ -232,7 +320,7 @@ devices:
     type: dcmt
     address: 8
 )",
-                        "Duplicate devices[].address");
+                        "duplicate address");
 }
 
 }  // namespace anolis_provider_bread
